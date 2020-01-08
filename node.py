@@ -12,25 +12,32 @@ class Grid:
                     self.end_pos = (row, col)
 
 
-
 class Node:
 
     def __init__(self, Grid, pos, parent = None):
         self.pos = pos
-        #self.g_cost = math.sqrt( ( (self.pos[0] - Grid.start_pos[0]) ** 2 + (self.pos[1] - Grid.start_pos[1]) ** 2 ))   # Distance from starting node
-        #self.h_cost = math.sqrt( ( (Grid.end_pos[0]  - self.pos[0]) ** 2 + (Grid.end_pos[1] - self.pos[1] ) ** 2  ))   # Distance from end node
-        self.g_cost = self.get_distance(self.pos, Grid.start_pos)
-        self.h_cost = self.get_distance(self.pos, Grid.end_pos)
+        self.g_cost = self.get_distance(Grid.start_pos) # Distance from starting node
+        self.h_cost = self.get_distance(Grid.end_pos) # Distance from end node
         if parent:
             self.parent = parent
         else:
             self.parent = None
 
-    @staticmethod
-    def get_distance(current_pos, reference_pos):
-        dx = abs(current_pos[0] - reference_pos[0])
-        dy = abs(current_pos[1] - reference_pos[1])
+    def get_distance(self, reference_pos):
+        dx = abs(self.pos[0] - reference_pos[0])
+        dy = abs(self.pos[1] - reference_pos[1])
         return (abs(dx-dy) * 1) + (min(dx, dy) * math.sqrt(2))
 
     def calc_f_cost(self):
         self.f_cost = self.g_cost + self.h_cost
+
+    def get_neighbour_nodes(self, Grid):
+        self.neighbour_nodes = []
+        for dx in range(-1, 2):
+            for dy in range(-1, 2):
+                if dx == 0 and dy == 0:
+                    continue
+                else:
+                    next_pos = (self.pos[0] + dx, self.pos[1] + dy)
+                    next_node = Node(Grid, next_pos)
+                    self.neighbour_nodes.append(next_node)
