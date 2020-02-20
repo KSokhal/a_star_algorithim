@@ -2,15 +2,34 @@ import math
 
 class Grid:
 
-    def __init__(self, grid):
-        self.grid = grid
-        for row in range(len(grid)):
-            for col in range(len(grid[row])):
-                if grid[row][col] == "S":
+    def __init__(self):
+        self.grid = self.get_grid()
+        for row in range(len(self.grid)):
+            for col in range(len(self.grid[row])):
+                if self.grid[row][col] == "S":
                     self.start_pos = (row, col)
-                elif grid[row][col] == "E":
+                elif self.grid[row][col] == "E":
                     self.end_pos = (row, col)
 
+    # Creats grid from text on notepad
+    #
+    # @return grid, nestesd lists that represent a 9x9 grid of intergers
+
+    def get_grid(self):
+        grid = []
+        with open("grid.txt") as file:
+            for line in file.readlines():
+                row = []
+                for number in line.strip("\n"):
+                    row.append(number)
+                grid.append(row)
+        return grid
+
+
+    # Prints grid in easier to see manor
+    def print_text_grid(self):
+        [print(i) for i in self.grid]
+        print("\n")
 
 class Node:
 
