@@ -3,9 +3,8 @@ from copy import deepcopy
 
 import pygame
 
-
 #Set display dimensions
-DISPLAY_WIDTH = 700
+DISPLAY_WIDTH = 600
 DISPLAY_HEIGHT = 600
 
 # Sets colours
@@ -17,10 +16,9 @@ BLUE = (0, 0 , 255)
 LIGHT_GREY = (100, 100, 100)
 DARK_GREY = (65, 65, 65)
 
-
 # Sets constants for display of grid
 GRID_START_POS = (10, 10)
-CELL_SIZE = 25
+CELL_SIZE = 30
 
 COLOURS = {
             "S": LIGHT_GREY,
@@ -28,73 +26,20 @@ COLOURS = {
             "W": BLACK
           }
 
-
-
-def pygame_testing():
-
-
-    end = False
-    
-    while not end:
-        # Quit case
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                break
-
-        pygame.event.set_allowed([pygame.QUIT, pygame.MOUSEBUTTONDOWN])
-        pygame.display.update()
-        print(pygame.event.get_blocked(pygame.ACTIVEEVENT))
-        ev = pygame.event.wait()
-        print(ev)
-        end = True
-
-
-
-
-
-
-
-
 def main():
-    # Creates grid to path find for
-    # S = Start point, E = End point, W = Walls
-    # grid =  [
-    #         ["O", "O", "O", "O", "O", "O", "O", "O", "O", "O", "O", "O"],
-    #         ["O", "O", "O", "O", "O", "O", "O", "O", "O", "O", "O", "O"],
-    #         ["O", "O", "S", "O", "O", "O", "O", "O", "O", "O", "O", "O"],
-    #         ["O", "O", "O", "O", "O", "O", "O", "O", "O", "O", "O", "O"],
-    #         ["O", "O", "O", "O", "O", "W", "W", "W", "W", "O", "O", "O"],
-    #         ["O", "O", "O", "O", "W", "W", "O", "O", "O", "O", "O", "O"],
-    #         ["O", "O", "O", "O", "W", "O", "O", "O", "O", "O", "O", "O"],
-    #         ["O", "O", "O", "O", "O", "O", "O", "O", "O", "O", "O", "O"],
-    #         ["O", "O", "O", "O", "O", "O", "O", "O", "O", "E", "O", "O"],
-    #         ["O", "O", "O", "O", "O", "O", "O", "O", "O", "O", "O", "O"],
-    #         ["O", "O", "O", "O", "O", "O", "O", "O", "O", "O", "O", "O"]
-    #         ]
 
-    #print_text_grid(grid)
+    # Sets up pygame
     pygame.init()
-    global font, small_font
-    font = pygame.font.SysFont("ubuntumono", 40)
     game_display = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
-    pygame.display.set_caption("Sudoku")
+    pygame.display.set_caption("A* Pathfinding")
     game_display.fill(WHITE)
     clock = pygame.time.Clock()
 
-
-
+    # Initialises all grid varibles
     grid = Grid()
-    grid.print_text_grid()
     draw_grid(game_display, grid.grid)
-
-
-
-
-
     # Creates copy of grid to fill in after path found
     complete_grid = deepcopy(grid.grid)
-    # Creates grid object
-    #grid = Grid(grid)
 
     # Creates list of open and closed nodes
     open = [] # Nodes on that are still a possibiliity 
@@ -104,8 +49,8 @@ def main():
     start_node = Node(grid, grid.start_pos)
     start_node.calc_f_cost()
     open.append(start_node)
+    change_colour(start_node.pos, GREEN, game_display)
 
-     
     while True:
 
         # Quit case
@@ -115,20 +60,20 @@ def main():
 
         # Set current node to first in open list
         current_node = open[0]
+        
 
-        # Search the open list for the node with the lowest f cost adn set it as the current node
+        # Search the open list for the node with the lowest f cost and set it as the current node
         for node in open:
             if node.f_cost == current_node.f_cost:
                 if node.h_cost < current_node.h_cost:
                     current_node = node
             if node.f_cost < current_node.f_cost:
                 current_node = node
-        
+
+
         # Remove node from the open list and add it to the closed list
         open.remove(current_node)
         closed.append(current_node)
-        pygame.draw.rect(game_display, RED, (GRID_START_POS[0] + (current_node.pos[0] * CELL_SIZE), GRID_START_POS[1] + (current_node.pos[1] * CELL_SIZE), CELL_SIZE, CELL_SIZE), 0)
-        pygame.display.update()
 
         # If current node is the end node, fill in completed grid with path
         if current_node.pos == grid.end_pos:
@@ -137,9 +82,7 @@ def main():
                 pos = (path_node.parent.pos[0], path_node.parent.pos[1])
                 if complete_grid[pos[0]][pos[1]] == "S":
                     break
-                pygame.draw.rect(game_display, BLUE, (GRID_START_POS[0] + (path_node.pos[0] * CELL_SIZE), GRID_START_POS[1] + (path_node.pos[1] * CELL_SIZE), CELL_SIZE, CELL_SIZE), 0)
-                pygame.display.update()
-
+                change_colour(path_node.pos, BLUE, game_display)
                 complete_grid[pos[0]][pos[1]] = "P"
                 path_node = path_node.parent
             input("End?")
@@ -164,13 +107,15 @@ def main():
                 neighbour.parent = current_node
                 if neighbour not in open:
                     open.append(neighbour)
-                    pygame.draw.rect(game_display, GREEN, (GRID_START_POS[0] + (neighbour.pos[0] * CELL_SIZE), GRID_START_POS[1] + (neighbour.pos[1] * CELL_SIZE), CELL_SIZE, CELL_SIZE), 0)
-                    pygame.display.update()
+        for i in open:
+            change_colour(i.pos, GREEN, game_display)
+        for i in closed:
+            change_colour(i.pos, RED, game_display)
 
-    print("Completed!")
+def change_colour(pos, new_colour, game_display):
+    pygame.draw.rect(game_display, new_colour, (GRID_START_POS[0] + (pos[0] * CELL_SIZE) + 1, GRID_START_POS[1] + (pos[1] * CELL_SIZE) + 1, CELL_SIZE - 2, CELL_SIZE - 2), 0)
+    pygame.display.update()
 
-    for i in complete_grid:
-        print(i)
 
 
 ## Draws a grid
@@ -181,13 +126,7 @@ def main():
 def draw_grid(display, grid):
     for row in range(len(grid)):
         for col in range(len(grid[row])):
-            # try:
-            #     print(grid[col][row])
-            # except IndexError:
-            #     print(f"Fail at col={col}, row = {row}")
-            
             cell_value = grid[row][col]
-
             if cell_value in COLOURS:
                 cell_colour = COLOURS[cell_value]
                 cell_fill = 0
@@ -197,13 +136,6 @@ def draw_grid(display, grid):
 
             pygame.draw.rect(display, cell_colour, (GRID_START_POS[0] + (row * CELL_SIZE), GRID_START_POS[1] + (col * CELL_SIZE), CELL_SIZE, CELL_SIZE), cell_fill)
             
-            # if cell_value == "0":
-            #     pygame.draw.rect(display, WHITE, (GRID_START_POS[0] + 10 + (row * CELL_SIZE), GRID_START_POS[1] + 10 + (col * CELL_SIZE), CELL_SIZE - 20, CELL_SIZE - 20), 0)
-            # else:
-            #     text = font.render(cell_value, True, BLACK)
-            #     text_size = font.size(cell_value)
-            #     text_start_pos = (round((CELL_SIZE - text_size[0]) / 2), round((CELL_SIZE - text_size[1]) / 2))
-            #     display.blit(text, (GRID_START_POS[0] + text_start_pos[0] + (row * CELL_SIZE), GRID_START_POS[1] + text_start_pos[1] + (col * CELL_SIZE)))
     
     pygame.display.update()
 
