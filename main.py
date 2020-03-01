@@ -46,17 +46,19 @@ def main():
     closed = [] # Nodes that have been checked and are not possible
 
     # Initialise the start point as a Node object, calculate its f cost, and add it to the open list
-    start_node = Node(grid, grid.start_pos)
+    start_node = Node(grid, grid.start_pos, WHITE)
     start_node.calc_f_cost()
     open.append(start_node)
     change_colour(start_node.pos, GREEN, game_display)
 
-    while True:
+    end = False
+
+    while not end:
 
         # Quit case
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                break
+                end = True
 
         # Set current node to first in open list
         current_node = open[0]
@@ -74,6 +76,9 @@ def main():
         # Remove node from the open list and add it to the closed list
         open.remove(current_node)
         closed.append(current_node)
+        if current_node.colour != RED:
+            change_colour(current_node.pos, GREEN, game_display)
+            current_node.colour = GREEN
 
         # If current node is the end node, fill in completed grid with path
         if current_node.pos == grid.end_pos:
@@ -92,9 +97,14 @@ def main():
         current_node.get_neighbour_nodes(grid)
 
         for neighbour in current_node.neighbour_nodes:
+            
+
             # If the neighbour is a wall or in the closed list skip it
             if grid.grid[neighbour.pos[0]][neighbour.pos[1]] == "W" or neighbour in closed:
                 continue
+            
+            change_colour(neighbour.pos, RED, game_display)
+            neighbour.colour = RED
 
             # Calculate the new g cost
             new_g_cost = current_node.g_cost + current_node.get_distance(neighbour.pos)
@@ -107,10 +117,9 @@ def main():
                 neighbour.parent = current_node
                 if neighbour not in open:
                     open.append(neighbour)
-        for i in open:
-            change_colour(i.pos, GREEN, game_display)
-        for i in closed:
-            change_colour(i.pos, RED, game_display)
+
+
+
 
 def change_colour(pos, new_colour, game_display):
     pygame.draw.rect(game_display, new_colour, (GRID_START_POS[0] + (pos[0] * CELL_SIZE) + 1, GRID_START_POS[1] + (pos[1] * CELL_SIZE) + 1, CELL_SIZE - 2, CELL_SIZE - 2), 0)

@@ -1,5 +1,15 @@
 import math
 
+
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0 , 255)
+LIGHT_GREY = (100, 100, 100)
+DARK_GREY = (65, 65, 65)
+
+
 class Grid:
 
     def __init__(self):
@@ -20,8 +30,8 @@ class Grid:
         with open("grid.txt") as file:
             for line in file.readlines():
                 row = []
-                for number in line.strip("\n"):
-                    row.append(number)
+                for letter in line.strip("\n"):
+                    row.append(letter)
                 grid.append(row)
         return grid
 
@@ -33,7 +43,7 @@ class Grid:
 
 class Node:
 
-    def __init__(self, Grid, pos, parent = None):
+    def __init__(self, Grid, pos, colour, parent = None):
         self.pos = pos
         self.g_cost = self.get_distance(Grid.start_pos) # Distance from starting node
         self.h_cost = self.get_distance(Grid.end_pos) # Distance from end node
@@ -41,6 +51,8 @@ class Node:
             self.parent = parent
         else:
             self.parent = None
+        self.colour = colour
+        
 
     def get_distance(self, reference_pos):
         dx = abs(self.pos[0] - reference_pos[0])
@@ -58,5 +70,5 @@ class Node:
                     continue
                 else:
                     next_pos = (self.pos[0] + dx, self.pos[1] + dy)
-                    next_node = Node(Grid, next_pos)
+                    next_node = Node(Grid, next_pos, colour=WHITE)
                     self.neighbour_nodes.append(next_node)
