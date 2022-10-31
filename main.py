@@ -108,8 +108,6 @@ def update_cell_display(display, node: Node):
     """
     cell_x = GRID_START_POS[0] + (node.pos[0] * CELL_SIZE) + 1
     cell_y = GRID_START_POS[1] + (node.pos[1] * CELL_SIZE) + 1
-    if node.type == NodeType.PATH:
-        print(node.pos[0], node.pos[1], node.type.value)
     pygame.draw.rect(display, node.type.value, (cell_y, cell_x, CELL_SIZE - 2, CELL_SIZE - 2), 0)
     pygame.display.update()
     pygame.time.delay(5)
